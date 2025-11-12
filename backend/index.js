@@ -20,6 +20,7 @@ const addressRoutes=require('./routes/Address')
 const reviewRoutes=require("./routes/Review")
 const wishlistRoutes=require("./routes/Wishlist")
 const paymentRoutes=require("./routes/Payment")
+const healthRoutes=require("./routes/Health")
 const { connectToDB } = require("./database/db")
 const { 
     errorHandler, 
@@ -180,6 +181,7 @@ server.use("/address",addressRoutes)
 server.use("/reviews",reviewRoutes)
 server.use("/wishlist",wishlistRoutes)
 server.use("/payments",paymentRoutes)
+server.use("/api",healthRoutes)
 
 // 404 handler for undefined routes
 server.use(notFoundHandler)
