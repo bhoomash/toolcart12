@@ -22,7 +22,7 @@ export const AddProduct = () => {
     const is480=useMediaQuery(theme.breakpoints.down(480))
 
     useEffect(()=>{
-        if(productAddStatus==='fullfilled'){
+        if(productAddStatus==='fulfilled'){
             reset()
             toast.success("New product added")
             navigate("/admin/dashboard")

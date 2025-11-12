@@ -41,7 +41,7 @@ export const Signup = () => {
 
   
   useEffect(()=>{
-    if(status==='fullfilled'){
+    if(status==='fulfilled'){
       toast.success("Welcome! Verify your email to start shopping on ToolCart.")
       reset()
     }
@@ -54,7 +54,7 @@ export const Signup = () => {
   // this function handles signup and dispatches the signup action with credentails that api requires
   const handleSignup=(data)=>{
     const cred={...data}
-    delete cred.confirmPassword
+    // Keep confirmPassword for backend validation, it will be removed after validation
     dispatch(signupAsync(cred))
   }
 
@@ -95,7 +95,7 @@ export const Signup = () => {
                       </motion.div>
 
                       <motion.div>
-                        <TextField type='password' fullWidth {...register("password",{required:"Password is required",pattern:{value:/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/gm,message:`at least 8 characters, must contain at least 1 uppercase letter, 1 lowercase letter, and 1 number, Can contain special characters`}})} placeholder='Password'/>
+                        <TextField type='password' fullWidth {...register("password",{required:"Password is required",pattern:{value:/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/,message:`at least 8 characters, must contain at least 1 uppercase letter, 1 lowercase letter, and 1 number, Can contain special characters`}})} placeholder='Password'/>
                         {errors.password && <FormHelperText error>{errors.password.message}</FormHelperText>}
                       </motion.div>
                       

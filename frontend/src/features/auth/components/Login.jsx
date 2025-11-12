@@ -40,7 +40,7 @@ export const Login = () => {
 
   // handles login status and dispatches reset actions to relevant states in cleanup
   useEffect(()=>{
-    if(status==='fullfilled' && loggedInUser?.isVerified===true){
+    if(status==='fulfilled' && loggedInUser?.isVerified===true){
       toast.success(`Login successful`)
       reset()
     }

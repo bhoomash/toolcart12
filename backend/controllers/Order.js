@@ -2,8 +2,10 @@ const Order = require("../models/Order");
 const { asyncErrorHandler, AppError } = require('../middleware/ErrorHandler');
 
 exports.create = asyncErrorHandler(async(req,res,next) => {
+    console.log('Creating order with data:', req.body);
     const created = new Order(req.body)
     await created.save()
+    console.log('Order created successfully:', created);
     res.status(201).json(created)
 });
 

@@ -55,10 +55,15 @@ export const fetchProductById=async(id)=>{
 }
 export const updateProductById=async(update)=>{
     try {
+        console.log('Sending product update request for ID:', update._id);
+        console.log('Update data:', update);
         const res=await axiosInstance.patch(`/products/${update._id}`,update)
+        console.log('Product update response:', res.data);
         return res.data
     } catch (error) {
-        throw error.response.data
+        console.error('Product update API error:', error);
+        console.error('Error response:', error.response?.data);
+        throw error.response?.data || { message: 'Network error or server unavailable' };
     }
 }
 export const undeleteProductById=async(id)=>{

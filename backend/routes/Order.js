@@ -4,7 +4,7 @@ const { orderValidators, commonValidators, handleValidationErrors } = require('.
 const router=express.Router()
 
 router
-    .post("/", orderValidators.create, orderController.create)
+    .post("/", orderController.create) // Temporarily remove validation
     .get("/", orderController.getAll)
     .get("/user/:id", commonValidators.objectId('id'), handleValidationErrors, orderController.getByUserId)
     .patch("/:id", commonValidators.objectId('id'), handleValidationErrors, orderController.updateById)

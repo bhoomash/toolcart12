@@ -1,4 +1,9 @@
 require("dotenv").config()
+
+// Validate environment variables before server startup
+const { validateEnvironmentVariables } = require('./utils/EnvironmentValidator');
+validateEnvironmentVariables();
+
 const express=require('express')
 const cors=require('cors')
 const morgan=require("morgan")
@@ -85,10 +90,63 @@ server.use(express.json())
 server.use(cookieParser())
 server.use(morgan("tiny"))
 
-// Apply security headers
+// Apply security headers with environment-specific configuration
+const isProduction = process.env.NODE_ENV === 'production';
+
+/**
+ * Security Headers Configuration
+ * - Production: Full security headers with restrictive CSP
+ * - Development: Minimal headers to avoid development issues
+ * 
+ * Security Features:
+ * - Content Security Policy (CSP) - Prevents XSS attacks
+ * - HTTP Strict Transport Security (HSTS) - Forces HTTPS
+ * - X-Frame-Options - Prevents clickjacking
+ * - X-Content-Type-Options - Prevents MIME sniffing
+ * - Referrer Policy - Controls referrer information
+ * - Cross-Origin Policies - Isolates resources
+ */
 server.use(helmet({
-    crossOriginEmbedderPolicy: false, // Allow embedding for development
-    contentSecurityPolicy: false, // Disable CSP for development (customize for production)
+    // Production: Enable COEP for better security isolation
+    // Development: Disable to avoid compatibility issues
+    crossOriginEmbedderPolicy: isProduction ? { policy: "require-corp" } : false,
+    
+    // Content Security Policy - restrictive in production, disabled in development
+    contentSecurityPolicy: isProduction ? {
+        directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+            scriptSrc: ["'self'"],
+            fontSrc: ["'self'", "https://fonts.gstatic.com"],
+            imgSrc: ["'self'", "data:", "https:"],
+            connectSrc: ["'self'", "https://api.razorpay.com"],
+            frameSrc: ["'none'"],
+            objectSrc: ["'none'"],
+            baseUri: ["'self'"],
+            formAction: ["'self'"],
+            upgradeInsecureRequests: []
+        }
+    } : false,
+    
+    // Additional security headers for production
+    crossOriginOpenerPolicy: isProduction ? { policy: "same-origin" } : false,
+    crossOriginResourcePolicy: isProduction ? { policy: "same-origin" } : false,
+    
+    // Always enable these security headers
+    dnsPrefetchControl: { allow: false },
+    frameguard: { action: 'deny' },
+    hidePoweredBy: true,
+    hsts: isProduction ? {
+        maxAge: 31536000, // 1 year
+        includeSubDomains: true,
+        preload: true
+    } : false,
+    ieNoOpen: true,
+    noSniff: true,
+    originAgentCluster: true,
+    permittedCrossDomainPolicies: false,
+    referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+    xssFilter: true
 }))
 
 // Security middlewares

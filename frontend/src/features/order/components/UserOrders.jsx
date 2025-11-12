@@ -66,8 +66,10 @@ export const UserOrders = () => {
 
 
     const handleAddToCart=(product)=>{
-        const item={user:loggedInUser._id,product:product._id,quantity:1}
-        dispatch(addToCartAsync(item))
+        if(product && product._id && loggedInUser?._id) {
+            const item={user:loggedInUser._id,product:product._id,quantity:1}
+            dispatch(addToCartAsync(item))
+        }
     }
 
 
@@ -102,8 +104,8 @@ export const UserOrders = () => {
 
                         {/* orders mapping */}
                         {
-                            orders && orders.map((order)=>(
-                                <Stack p={is480?0:2} component={is480?"":Paper} elevation={1} rowGap={2}>
+                            orders && orders.length > 0 && orders.map((order)=>(
+                                <Stack key={order._id} p={is480?0:2} component={is480?"":Paper} elevation={1} rowGap={2}>
                                     
                                     {/* upper */}
                                     <Stack flexDirection={'row'} rowGap={'1rem'}  justifyContent={'space-between'} flexWrap={'wrap'}>
@@ -125,7 +127,7 @@ export const UserOrders = () => {
                                         </Stack>
 
                                         <Stack>
-                                            <Typography>Item: {order.item.length}</Typography>
+                                            <Typography>Item: {order.item?.length || 0}</Typography>
                                         </Stack>
                                     </Stack>
 
@@ -133,34 +135,36 @@ export const UserOrders = () => {
                                     <Stack rowGap={2}>
 
                                         {
-                                            order.item.map((product)=>(
+                                            order.item?.map((product)=>(
                                                 
                                                 <Stack mt={2} flexDirection={'row'} rowGap={is768?'2rem':''} columnGap={4} flexWrap={is768?"wrap":"nowrap"}>
                                                     
                                                     <Stack>
-                                                        <img style={{width:"100%",aspectRatio:is480?3/2:1/1,objectFit:"contain"}} src={product.product.images[0]} alt="" />
+                                                        <img style={{width:"100%",aspectRatio:is480?3/2:1/1,objectFit:"contain"}} src={product.product?.images?.[0] || product.product?.thumbnail || '/placeholder-image.jpg'} alt="" />
                                                     </Stack>
 
                                                     <Stack rowGap={1} width={'100%'}>
 
                                                         <Stack flexDirection={'row'} justifyContent={'space-between'}>
                                                             <Stack>
-                                                                <Typography variant='h6' fontSize={'1rem'} fontWeight={500}>{product.product.title}</Typography>
-                                                                <Typography variant='body1'  fontSize={'.9rem'}  color={'text.secondary'}>{product.product.brand.name}</Typography>
-                                                                <Typography color={'text.secondary'} fontSize={'.9rem'}>Qty: {product.quantity}</Typography>
+                                                                <Typography variant='h6' fontSize={'1rem'} fontWeight={500}>{product.product?.title || 'Product Title'}</Typography>
+                                                                <Typography variant='body1'  fontSize={'.9rem'}  color={'text.secondary'}>{product.product?.brand?.name || 'Brand'}</Typography>
+                                                                <Typography color={'text.secondary'} fontSize={'.9rem'}>Qty: {product.quantity || 1}</Typography>
                                                             </Stack>
-                                                            <Typography>₹{product.product.price}</Typography>
+                                                            <Typography>₹{product.product?.price || 0}</Typography>
                                                         </Stack>
 
-                                                        <Typography color={'text.secondary'}>{product.product.description}</Typography>
+                                                        <Typography color={'text.secondary'}>{product.product?.description || 'No description available'}</Typography>
 
                                                         <Stack mt={2} alignSelf={is480?"flex-start":'flex-end'} flexDirection={'row'} columnGap={2} >
-                                                            <Button size='small' component={Link} to={`/product-details/${product.product._id}`} variant='outlined'>View Product</Button>
-                                                            {
+                                                            {product.product?._id && (
+                                                                <Button size='small' component={Link} to={`/product-details/${product.product._id}`} variant='outlined'>View Product</Button>
+                                                            )}
+                                                            {product.product?._id && (
                                                                 cartItems.some((cartItem)=>cartItem.product._id===product.product._id)?
                                                                 <Button  size='small' variant='contained' component={Link} to={"/cart"}>Already in Cart</Button>
                                                                 :<Button  size='small' variant='contained' onClick={()=>handleAddToCart(product.product)}>Buy Again</Button>
-                                                            }
+                                                            )}
                                                         </Stack>
 
                                                     </Stack>
@@ -185,7 +189,7 @@ export const UserOrders = () => {
                         
                         {/* no orders animation */}
                         {
-                        !orders.length && 
+                        (!orders || orders.length === 0) && 
                             <Stack mt={is480?'2rem':0} mb={'7rem'} alignSelf={'center'} rowGap={2}>
 
                                 <Stack width={is660?"auto":'30rem'} height={is660?"auto":'30rem'}>

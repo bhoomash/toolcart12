@@ -7,6 +7,7 @@ const { sanitizeUser } = require("../utils/SanitizeUser");
 const { generateToken } = require("../utils/GenerateToken");
 const PasswordResetToken = require("../models/PasswordResetToken");
 const { AppError, asyncErrorHandler } = require('../middleware/ErrorHandler');
+const { sendAuthSuccess, sendSuccess } = require('../utils/ResponseFormatter');
 
 exports.signup = asyncErrorHandler(async(req,res,next) => {
         const existingUser=await User.findOne({email:req.body.email})
@@ -15,6 +16,9 @@ exports.signup = asyncErrorHandler(async(req,res,next) => {
         if(existingUser){
             throw new AppError("User already exists", 409, 'CONFLICT_ERROR');
         }
+
+        // Remove confirmPassword field as it's not needed in the database
+        delete req.body.confirmPassword
 
         // hashing the password
         const hashedPassword=await bcrypt.hash(req.body.password,10)
@@ -57,10 +61,12 @@ exports.signup = asyncErrorHandler(async(req,res,next) => {
             secure:process.env.PRODUCTION==='true'?true:false
         })
 
-        res.status(201).json({
-            ...sanitizeUser(createdUser),
-            message: "Account created successfully! Please check your email for the verification OTP."
-        })
+        return sendAuthSuccess(
+            res, 
+            sanitizeUser(createdUser), 
+            "Account created successfully! Please check your email for the verification OTP.", 
+            201
+        );
     });
 
 exports.login = asyncErrorHandler(async(req,res,next) => {
@@ -83,7 +89,7 @@ exports.login = asyncErrorHandler(async(req,res,next) => {
             httpOnly:true,
             secure:process.env.PRODUCTION==='true'?true:false
         })
-        return res.status(200).json(sanitizeUser(existingUser))
+        return sendAuthSuccess(res, sanitizeUser(existingUser), "Login successful");
     }
 
     res.clearCookie('token');

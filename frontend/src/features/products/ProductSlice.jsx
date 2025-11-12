@@ -75,7 +75,7 @@ const productSlice=createSlice({
                 state.productAddStatus='pending'
             })
             .addCase(addProductAsync.fulfilled,(state,action)=>{
-                state.productAddStatus='fullfilled'
+                state.productAddStatus='fulfilled'
                 state.products.push(action.payload)
             })
             .addCase(addProductAsync.rejected,(state,action)=>{
@@ -87,7 +87,7 @@ const productSlice=createSlice({
                 state.productFetchStatus='pending'
             })
             .addCase(fetchProductsAsync.fulfilled,(state,action)=>{
-                state.productFetchStatus='fullfilled'
+                state.productFetchStatus='fulfilled'
                 state.products=action.payload.data
                 state.totalResults=action.payload.totalResults
             })
@@ -100,7 +100,7 @@ const productSlice=createSlice({
                 state.productFetchStatus='pending'
             })
             .addCase(fetchProductByIdAsync.fulfilled,(state,action)=>{
-                state.productFetchStatus='fullfilled'
+                state.productFetchStatus='fulfilled'
                 state.selectedProduct=action.payload
             })
             .addCase(fetchProductByIdAsync.rejected,(state,action)=>{
@@ -112,7 +112,7 @@ const productSlice=createSlice({
                 state.productUpdateStatus='pending'
             })
             .addCase(updateProductByIdAsync.fulfilled,(state,action)=>{
-                state.productUpdateStatus='fullfilled'
+                state.productUpdateStatus='fulfilled'
                 const index=state.products.findIndex((product)=>product._id===action.payload._id)
                 state.products[index]=action.payload
             })
@@ -125,7 +125,7 @@ const productSlice=createSlice({
                 state.status='pending'
             })
             .addCase(undeleteProductByIdAsync.fulfilled,(state,action)=>{
-                state.status='fullfilled'
+                state.status='fulfilled'
                 const index=state.products.findIndex((product)=>product._id===action.payload._id)
                 state.products[index]=action.payload
             })
@@ -138,7 +138,7 @@ const productSlice=createSlice({
                 state.status='pending'
             })
             .addCase(deleteProductByIdAsync.fulfilled,(state,action)=>{
-                state.status='fullfilled'
+                state.status='fulfilled'
                 const index=state.products.findIndex((product)=>product._id===action.payload._id)
                 state.products[index]=action.payload
             })

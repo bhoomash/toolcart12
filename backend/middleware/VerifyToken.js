@@ -1,6 +1,7 @@
 require('dotenv').config()
 const jwt=require('jsonwebtoken')
 const { sanitizeUser } = require('../utils/SanitizeUser')
+const { AppError } = require('./ErrorHandler')
 
 exports.verifyToken=async(req,res,next)=>{
     try {
@@ -27,8 +28,6 @@ exports.verifyToken=async(req,res,next)=>{
         }
         
     } catch (error) {
-
-        console.log(error);
         
         if (error instanceof jwt.TokenExpiredError) {
             return res.status(401).json({ message: "Token expired, please login again" });
@@ -37,7 +36,13 @@ exports.verifyToken=async(req,res,next)=>{
             return res.status(401).json({ message: "Invalid Token, please login again" });
         } 
         else {
-            return res.status(500).json({ message: "Internal Server Error" });
+            // Use proper error handling instead of console.log
+            const appError = new AppError(
+                "Token verification failed", 
+                500, 
+                'AUTHENTICATION_ERROR'
+            );
+            next(appError);
         }
     }
 }

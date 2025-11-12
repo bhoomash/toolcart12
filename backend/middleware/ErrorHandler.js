@@ -153,20 +153,19 @@ const createErrorResponse = (error, req) => {
     
     const { category, statusCode } = categorizeError(error);
     
+    // Standardized error response format
     const response = {
         success: false,
-        error: {
-            message: error.message || 'An unexpected error occurred',
-            category: category,
-            timestamp: new Date().toISOString(),
-            requestId: req?.id || `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-        }
+        message: error.message || 'An unexpected error occurred',
+        errorCode: category,
+        timestamp: new Date().toISOString(),
+        ...(req?.id && { requestId: req.id })
     };
 
     // Add development-specific information
     if (isDevelopment) {
-        response.error.stack = error.stack;
-        response.error.details = {
+        response.stack = error.stack;
+        response.details = {
             name: error.name,
             statusCode: statusCode,
             isOperational: error.isOperational
@@ -176,25 +175,25 @@ const createErrorResponse = (error, req) => {
     // Add user-friendly messages for common errors
     switch (category) {
         case 'VALIDATION_ERROR':
-            response.error.userMessage = 'Please check your input and try again.';
+            response.userMessage = 'Please check your input and try again.';
             break;
         case 'AUTHENTICATION_ERROR':
-            response.error.userMessage = 'Please log in to access this resource.';
+            response.userMessage = 'Please log in to access this resource.';
             break;
         case 'AUTHORIZATION_ERROR':
-            response.error.userMessage = 'You do not have permission to perform this action.';
+            response.userMessage = 'You do not have permission to perform this action.';
             break;
         case 'NOT_FOUND_ERROR':
-            response.error.userMessage = 'The requested resource was not found.';
+            response.userMessage = 'The requested resource was not found.';
             break;
         case 'CONFLICT_ERROR':
-            response.error.userMessage = 'This item already exists or conflicts with existing data.';
+            response.userMessage = 'This item already exists or conflicts with existing data.';
             break;
         case 'DATABASE_ERROR':
-            response.error.userMessage = 'Database temporarily unavailable. Please try again later.';
+            response.userMessage = 'Database temporarily unavailable. Please try again later.';
             break;
         default:
-            response.error.userMessage = 'An unexpected error occurred. Please try again later.';
+            response.userMessage = 'An unexpected error occurred. Please try again later.';
     }
 
     return { response, statusCode };

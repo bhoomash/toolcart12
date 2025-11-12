@@ -27,7 +27,7 @@ export const ForgotPassword = () => {
     },[error])
 
     useEffect(()=>{
-        if(status==='fullfilled'){
+        if(status==='fulfilled'){
             toast.success(successMessage?.message)
         }
         return ()=>{
@@ -54,12 +54,12 @@ export const ForgotPassword = () => {
                 <Stack component={'form'} width={is500?"95vw":'30rem'} p={is500?"1rem":'1.5rem'} rowGap={'1rem'} noValidate onSubmit={handleSubmit(handleForgotPassword)}>
                         
                         <Stack rowGap={'.4rem'}>
-                            <Typography variant='h5' fontWeight={600}>{status==='fullfilled'?"Email has been sent!":"Forgot Your Password?"}</Typography>
-                            <Typography color={'text.secondary'} variant='body2'>{status==='fullfilled'?"Please check your inbox and click on the received link to reset your password":"Enter your registered email below to receive password reset link"}</Typography>
+                            <Typography variant='h5' fontWeight={600}>{status==='fulfilled'?"Email has been sent!":"Forgot Your Password?"}</Typography>
+                            <Typography color={'text.secondary'} variant='body2'>{status==='fulfilled'?"Please check your inbox and click on the received link to reset your password":"Enter your registered email below to receive password reset link"}</Typography>
                         </Stack>
                         
                         {
-                            status!=='fullfilled' &&
+                            status!=='fulfilled' &&
                         <>
                         <motion.div whileHover={{y:-2}}>
                             <TextField fullWidth sx={{mt:1}} {...register("email",{required:"Please enter a email",pattern:{value:/[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/g,message:"Enter a valid email"}})} placeholder='Enter email'/>

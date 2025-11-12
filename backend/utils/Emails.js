@@ -1,4 +1,5 @@
 const nodemailer = require("nodemailer");
+const { AppError } = require("../middleware/ErrorHandler");
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
@@ -24,7 +25,6 @@ exports.sendMail = async(receiverEmail,subject,body) => {
     console.log('Email sent successfully:', info.messageId);
     return info;
   } catch (error) {
-    console.error('Email sending failed:', error);
-    throw error;
+    throw new AppError('Failed to send email', 500, 'EXTERNAL_API_ERROR');
   }
 };

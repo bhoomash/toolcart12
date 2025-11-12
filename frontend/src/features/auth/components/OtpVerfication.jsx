@@ -71,7 +71,7 @@ export const OtpVerfication = () => {
     },[otpVerificationError])
 
     useEffect(()=>{
-        if(otpVerificationStatus==='fullfilled'){
+        if(otpVerificationStatus==='fulfilled'){
             toast.success("Email verified! We are happy to have you here")
             dispatch(resetResendOtpStatus())
         }
@@ -89,7 +89,7 @@ export const OtpVerfication = () => {
             <Typography mt={4} variant='h5' fontWeight={500}>Verify Your Email Address</Typography>
 
             {
-                resendOtpStatus==='fullfilled'?(
+                loggedInUser && !loggedInUser?.isVerified ?(
                     <Stack width={'100%'} rowGap={'1rem'} component={'form'} noValidate onSubmit={handleSubmit(handleVerifyOtp)}>
                         <Stack rowGap={'1rem'}> 
                             <Stack>
@@ -101,16 +101,20 @@ export const OtpVerfication = () => {
                                 {errors?.otp && <FormHelperText sx={{color:"red"}}>{errors.otp.message}</FormHelperText>}
                             </Stack>
                        </Stack>
-                        <LoadingButton loading={otpVerificationStatus==='pending'}  type='submit' fullWidth variant='contained'>Verify</LoadingButton>
+                        <Stack flexDirection={'row'} gap={2}>
+                            <LoadingButton loading={otpVerificationStatus==='pending'}  type='submit' fullWidth variant='contained'>Verify</LoadingButton>
+                            <LoadingButton onClick={handleSendOtp} loading={resendOtpStatus==='pending'} variant='outlined' fullWidth>Resend OTP</LoadingButton>
+                        </Stack>
                     </Stack>
                 ):
-                <>
                 <Stack>
-                    <Typography color={'GrayText'}>We will send you a OTP on</Typography>
-                    <Typography fontWeight={'600'} color={'GrayText'}>{loggedInUser?.email}</Typography>
+                    <Typography variant="h6" color={'success.main'} textAlign="center">
+                        Your email is already verified!
+                    </Typography>
+                    <Typography color={'GrayText'} textAlign="center">
+                        You can now access all features.
+                    </Typography>
                 </Stack>
-                <LoadingButton onClick={handleSendOtp} loading={resendOtpStatus==='pending'} fullWidth variant='contained'>Get OTP</LoadingButton>
-                </>
              }
 
         </Stack>

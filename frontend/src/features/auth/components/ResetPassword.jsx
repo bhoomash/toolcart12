@@ -29,7 +29,7 @@ export const ResetPassword = () => {
     },[error])
 
     useEffect(()=>{
-        if(status==='fullfilled'){
+        if(status==='fulfilled'){
             toast.success(successMessage?.message)
             navigate("/login")
         }

@@ -1,4 +1,4 @@
-import { Button, FormControl, Grid, IconButton, InputLabel, MenuItem, Pagination, Select, Stack, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { Button, Grid, IconButton, Pagination, Stack, Typography, useMediaQuery, useTheme } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import Accordion from '@mui/material/Accordion';
@@ -18,17 +18,11 @@ import ClearIcon from '@mui/icons-material/Clear';
 import { ITEMS_PER_PAGE } from '../../../constants';
 import { toast } from 'react-toastify';
 
-const sortOptions=[
-    {name:"Price: low to high",sort:"price",order:"asc"},
-    {name:"Price: high to low",sort:"price",order:"desc"},
-]
-
 export const AdminDashBoard = () => {
 
     const [filters,setFilters]=useState({})
     const brands=useSelector(selectBrands)
     const categories=useSelector(selectCategories)
-    const [sort,setSort]=useState(null)
     const [page,setPage]=useState(1)
     const products=useSelector(selectProducts)
     const dispatch=useDispatch()
@@ -52,11 +46,10 @@ export const AdminDashBoard = () => {
         const finalFilters={...filters}
 
         finalFilters['pagination']={page:page,limit:ITEMS_PER_PAGE}
-        finalFilters['sort']=sort
 
         dispatch(fetchProductsAsync(finalFilters))
         
-    },[filters,sort,page])
+    },[filters,page])
 
     // Handle delete operation status
     useEffect(()=>{
@@ -65,7 +58,6 @@ export const AdminDashBoard = () => {
             // Refresh the product list to reflect changes
             const finalFilters={...filters}
             finalFilters['pagination']={page:page,limit:ITEMS_PER_PAGE}
-            finalFilters['sort']=sort
             dispatch(fetchProductsAsync(finalFilters))
         } else if(productStatus === 'rejected') {
             toast.error("Failed to perform product operation. Please try again.");
@@ -184,31 +176,6 @@ export const AdminDashBoard = () => {
     </motion.div>
 
     <Stack rowGap={5} mt={is600?2:5} mb={'3rem'}>
-
-        {/* sort options */}
-        <Stack flexDirection={'row'} mr={'2rem'} justifyContent={'flex-end'} alignItems={'center'} columnGap={5}>
-
-            <Stack alignSelf={'flex-end'} width={'12rem'}>
-                <FormControl fullWidth>
-                        <InputLabel id="sort-dropdown">Sort</InputLabel>
-                        <Select
-                            variant='standard'
-                            labelId="sort-dropdown"
-                            label="Sort"
-                            onChange={(e)=>setSort(e.target.value)}
-                            value={sort}
-                        >
-                            <MenuItem bgcolor='text.secondary' value={null}>Reset</MenuItem>
-                            {
-                                sortOptions.map((option)=>(
-                                    <MenuItem key={option} value={option}>{option.name}</MenuItem>
-                                ))
-                            }
-                        </Select>
-                </FormControl>
-            </Stack>
-
-        </Stack>
      
         <Grid gap={2} container flex={1} justifyContent={'center'} alignContent={"center"}>
             {

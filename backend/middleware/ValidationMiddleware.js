@@ -161,10 +161,17 @@ const authValidators = {
             .custom(isValidObjectId)
             .withMessage('Valid user ID is required'),
         body('otp')
-            .isLength({ min: 6, max: 6 })
-            .withMessage('OTP must be 6 digits')
+            .isLength({ min: 4, max: 4 })
+            .withMessage('OTP must be 4 digits')
             .isNumeric()
             .withMessage('OTP must contain only numbers'),
+        handleValidationErrors
+    ],
+
+    resendOtp: [
+        body('user')
+            .custom(isValidObjectId)
+            .withMessage('Valid user ID is required'),
         handleValidationErrors
     ]
 };
@@ -216,13 +223,24 @@ const productValidators = {
             .withMessage('Stock quantity must be a non-negative integer'),
         body('brand')
             .optional()
-            .custom(isValidObjectId)
-            .withMessage('Brand ID must be valid'),
+            .custom((value) => {
+                if (value && !isValidObjectId(value)) {
+                    throw new Error('Brand ID must be valid');
+                }
+                return true;
+            }),
         body('category')
             .optional()
-            .custom(isValidObjectId)
-            .withMessage('Category ID must be valid'),
-        commonValidators.url('thumbnail'),
+            .custom((value) => {
+                if (value && !isValidObjectId(value)) {
+                    throw new Error('Category ID must be valid');
+                }
+                return true;
+            }),
+        body('thumbnail')
+            .optional()
+            .isURL()
+            .withMessage('Thumbnail must be a valid URL'),
         body('images')
             .optional()
             .isArray()
@@ -231,7 +249,10 @@ const productValidators = {
             .optional()
             .isURL()
             .withMessage('All images must be valid URLs'),
-        commonValidators.boolean('isDeleted'),
+        body('isDeleted')
+            .optional()
+            .isBoolean()
+            .withMessage('isDeleted must be a boolean'),
         handleValidationErrors
     ],
 
@@ -388,26 +409,26 @@ const orderValidators = {
         body('user')
             .custom(isValidObjectId)
             .withMessage('Valid user ID is required'),
-        body('items')
+        body('item')
             .isArray({ min: 1 })
             .withMessage('At least one item is required'),
-        body('items.*.product')
+        body('item.*.product')
             .custom(isValidObjectId)
             .withMessage('Valid product ID is required for each item'),
-        body('items.*.quantity')
+        body('item.*.quantity')
             .isInt({ min: 1, max: 10 })
             .withMessage('Quantity must be between 1 and 10 for each item'),
-        body('items.*.price')
+        body('item.*.price')
             .isNumeric()
             .custom(value => value > 0)
             .withMessage('Price must be positive for each item'),
-        body('totalAmount')
+        body('total')
             .isNumeric()
             .custom(value => value > 0)
             .withMessage('Total amount must be positive'),
-        body('shippingAddress')
-            .custom(isValidObjectId)
-            .withMessage('Valid shipping address ID is required'),
+        body('address')
+            .notEmpty()
+            .withMessage('Shipping address is required'),
         handleValidationErrors
     ]
 };

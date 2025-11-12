@@ -1,5 +1,6 @@
 const User=require("../models/User")
 const { asyncErrorHandler, AppError } = require('../middleware/ErrorHandler');
+const { sendSuccess, sendNotFound } = require('../utils/ResponseFormatter');
 
 exports.getById = asyncErrorHandler(async(req,res,next) => {
     const {id} = req.params
@@ -11,8 +12,9 @@ exports.getById = asyncErrorHandler(async(req,res,next) => {
     
     const userObject = result.toObject()
     delete userObject.password
-    res.status(200).json(userObject)
+    return sendSuccess(res, userObject, 'User retrieved successfully');
 });
+
 exports.updateById = asyncErrorHandler(async(req,res,next) => {
     const {id} = req.params
     const updated = await User.findByIdAndUpdate(id,req.body,{new:true})
@@ -23,5 +25,5 @@ exports.updateById = asyncErrorHandler(async(req,res,next) => {
     
     const userObject = updated.toObject()
     delete userObject.password
-    res.status(200).json(userObject)
+    return sendSuccess(res, userObject, 'User updated successfully');
 });

@@ -64,8 +64,12 @@ export const Checkout = () => {
             // For COD, create order directly
             const order={
                 user:loggedInUser._id,
-                item:cartItems,
-                address:selectedAddress,
+                item: cartItems.map(item => ({
+                    product: item.product._id,
+                    quantity: item.quantity,
+                    price: item.product.price
+                })),
+                address: selectedAddress,
                 paymentMode:selectedPaymentMethod,
                 total:finalTotal,
                 paymentStatus: selectedPaymentMethod === 'COD' ? 'pending' : 'paid'
@@ -74,21 +78,52 @@ export const Checkout = () => {
         }
     }
 
-    const handlePaymentSuccess = (paymentData) => {
-        // Create order with payment details
-        const order = {
-            user: loggedInUser._id,
-            item: cartItems,
-            address: selectedAddress,
-            paymentMode: 'razorpay',
-            total: finalTotal,
-            paymentStatus: 'paid',
-            paymentId: paymentData.paymentId,
-            razorpayOrderId: paymentData.razorpay_order_id,
-            razorpaySignature: paymentData.razorpay_signature
+    const handlePaymentSuccess = async (paymentData) => {
+        try {
+            // Create order with payment details
+            const order = {
+                user: loggedInUser._id,
+                item: cartItems.map(item => ({
+                    product: item.product._id,
+                    quantity: item.quantity,
+                    price: item.product.price
+                })),
+                address: selectedAddress,
+                paymentMode: 'razorpay',
+                total: finalTotal,
+                paymentStatus: 'paid',
+                paymentId: paymentData.paymentId,
+                razorpayOrderId: paymentData.razorpay_order_id,
+                razorpaySignature: paymentData.razorpay_signature
+            }
+            
+            // Create the order
+            const orderResult = await dispatch(createOrderAsync(order));
+            
+            if (orderResult.type === 'orders/createOrderAsync/fulfilled') {
+                // Order created successfully, now verify payment if needed
+                console.log('Order created successfully:', orderResult.payload);
+                
+                // Optionally verify payment with the created order ID
+                // const verificationData = {
+                //     razorpay_order_id: paymentData.razorpay_order_id,
+                //     razorpay_payment_id: paymentData.paymentId,
+                //     razorpay_signature: paymentData.razorpay_signature,
+                //     orderId: orderResult.payload._id
+                // };
+                // await dispatch(verifyPaymentAsync(verificationData));
+                
+                setShowPayment(false);
+                // Redirect to success page or show success message
+                alert('Order placed successfully!');
+            } else {
+                console.error('Order creation failed:', orderResult.error);
+                alert('Order creation failed. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error in payment success handling:', error);
+            alert('Error processing order. Please contact support.');
         }
-        dispatch(createOrderAsync(order))
-        setShowPayment(false)
     }
 
     const handlePaymentCancel = () => {

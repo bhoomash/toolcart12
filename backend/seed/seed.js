@@ -23,9 +23,10 @@ const seedData=async()=>{
         await seedReview()
         await seedOrder()
 
-        console.log('Seed completed..');
+        console.log('🎯 Seed completed successfully');
     } catch (error) {
-        console.log(error);
+        console.error('💥 Seeding failed:', error.message);
+        process.exit(1);
     }
 }
 

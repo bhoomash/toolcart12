@@ -65,12 +65,17 @@ exports.getById = asyncErrorHandler(async(req,res,next) => {
 
 exports.updateById = asyncErrorHandler(async(req,res,next) => {
     const {id} = req.params
+    console.log('Updating product with ID:', id);
+    console.log('Update data received:', req.body);
+    
     const updated = await Product.findByIdAndUpdate(id,req.body,{new:true})
     
     if(!updated) {
+        console.log('Product not found for ID:', id);
         throw new AppError('Product not found', 404, 'PRODUCT_NOT_FOUND');
     }
     
+    console.log('Product updated successfully:', updated);
     res.status(200).json(updated)
 });
 

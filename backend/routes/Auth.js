@@ -14,7 +14,7 @@ router
     .post("/signup", createAccountRateLimiter, authValidators.register, authController.signup)
     .post('/login', authRateLimiter, authValidators.login, authController.login)
     .post("/verify-otp", otpRateLimiter, authValidators.verifyOtp, authController.verifyOtp)
-    .post("/resend-otp", otpRateLimiter, authValidators.verifyOtp, authController.resendOtp)
+    .post("/resend-otp", otpRateLimiter, authValidators.resendOtp, authController.resendOtp)
     .post("/forgot-password", passwordResetRateLimiter, authValidators.forgotPassword, authController.forgotPassword)
     .post("/reset-password", passwordResetRateLimiter, authValidators.resetPassword, authController.resetPassword)
     .get("/check-auth", verifyToken, authController.checkAuth)

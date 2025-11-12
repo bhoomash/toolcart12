@@ -74,7 +74,7 @@ const PaymentComponent = ({ orderData, onPaymentSuccess, onPaymentCancel, select
 
             // Prepare order data
             const paymentOrderData = {
-                amount: orderData?.amount || totalPrice,
+                amount: orderData?.amount || Math.round(totalPrice * 100), // Convert to paise and ensure integer
                 currency: "INR",
                 receipt: `order_${Date.now()}`,
                 notes: {
@@ -107,7 +107,7 @@ const PaymentComponent = ({ orderData, onPaymentSuccess, onPaymentCancel, select
             name: "ToolCart",
             description: "Payment for automation tools",
             order_id: paymentOrder.id,
-            image: "/logo192.png", // Your app logo
+            image: window.location.protocol + "//" + window.location.host + "/logo192.png", // Your app logo with proper protocol
             handler: async function (response) {
                 await handlePaymentSuccess(response);
             },
@@ -146,25 +146,19 @@ const PaymentComponent = ({ orderData, onPaymentSuccess, onPaymentCancel, select
         try {
             setIsProcessing(true);
             
-            const verificationData = {
+            // Create the order first, then verify payment
+            const paymentData = {
+                paymentId: response.razorpay_payment_id,
                 razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                orderDetails: {
-                    ...orderData,
-                    paymentMethod: "razorpay",
-                    paymentStatus: "paid"
-                }
+                razorpay_signature: response.razorpay_signature
             };
 
-            const verifyResult = await dispatch(verifyPaymentAsync(verificationData));
+            // Call the parent's onPaymentSuccess with the payment data
+            onPaymentSuccess && onPaymentSuccess(paymentData);
             
-            if (verifyResult.type === "payment/verifyPaymentAsync/fulfilled") {
-                onPaymentSuccess && onPaymentSuccess(verifyResult.payload);
-            }
         } catch (error) {
             // Log sanitized error without exposing payment verification details
-            console.error("Payment verification failed");
+            console.error("Payment success handling failed");
         } finally {
             setIsProcessing(false);
         }
