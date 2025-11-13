@@ -9,6 +9,7 @@ const initialState={
     resendOtpError:null,
     signupStatus:"idle",
     signupError:null,
+    signupData:null, // Store signup response data for OTP verification
     loginStatus:"idle",
     loginError:null,
     loggedInUser:null,
@@ -82,6 +83,9 @@ const authSlice=createSlice({
         clearSignupError:(state)=>{
             state.signupError=null
         },
+        clearSignupData:(state)=>{
+            state.signupData=null
+        },
         resetLoginStatus:(state)=>{
             state.loginStatus='idle'
         },
@@ -131,7 +135,7 @@ const authSlice=createSlice({
             })
             .addCase(signupAsync.fulfilled,(state,action)=>{
                 state.signupStatus='fulfilled'
-                state.loggedInUser=action.payload
+                state.signupData=action.payload.data // Store signup data instead of setting loggedInUser
             })
             .addCase(signupAsync.rejected,(state,action)=>{
                 state.signupStatus='rejected'
@@ -143,7 +147,8 @@ const authSlice=createSlice({
             })
             .addCase(loginAsync.fulfilled,(state,action)=>{
                 state.loginStatus='fulfilled'
-                state.loggedInUser=action.payload
+                // Handle both nested and direct response formats
+                state.loggedInUser = action.payload?.data?.user || action.payload?.data || action.payload
             })
             .addCase(loginAsync.rejected,(state,action)=>{
                 state.loginStatus='rejected'
@@ -155,7 +160,8 @@ const authSlice=createSlice({
             })
             .addCase(verifyOtpAsync.fulfilled,(state,action)=>{
                 state.otpVerificationStatus='fulfilled'
-                state.loggedInUser=action.payload
+                // Handle both nested and direct response formats
+                state.loggedInUser = action.payload?.data?.user || action.payload?.data || action.payload
             })
             .addCase(verifyOtpAsync.rejected,(state,action)=>{
                 state.otpVerificationStatus='rejected'
@@ -215,7 +221,8 @@ const authSlice=createSlice({
             })
             .addCase(checkAuthAsync.fulfilled,(state,action)=>{
                 state.status='fulfilled'
-                state.loggedInUser=action.payload
+                // Handle both nested and direct response formats
+                state.loggedInUser = action.payload?.data?.user || action.payload?.data || action.payload
                 state.isAuthChecked=true
             })
             .addCase(checkAuthAsync.rejected,(state,action)=>{
@@ -239,6 +246,7 @@ export const selectResendOtpSuccessMessage=(state)=>state.AuthSlice.resendOtpSuc
 export const selectResendOtpError=(state)=>state.AuthSlice.resendOtpError
 export const selectSignupStatus=(state)=>state.AuthSlice.signupStatus
 export const selectSignupError=(state)=>state.AuthSlice.signupError
+export const selectSignupData=(state)=>state.AuthSlice.signupData
 export const selectLoginStatus=(state)=>state.AuthSlice.loginStatus
 export const selectLoginError=(state)=>state.AuthSlice.loginError
 export const selectOtpVerificationStatus=(state)=>state.AuthSlice.otpVerificationStatus
@@ -251,7 +259,7 @@ export const selectResetPasswordSuccessMessage=(state)=>state.AuthSlice.resetPas
 export const selectResetPasswordError=(state)=>state.AuthSlice.resetPasswordError
 
 // exporting reducers
-export const {clearAuthSuccessMessage,clearAuthErrors,resetAuthStatus,clearSignupError,resetSignupStatus,clearLoginError,resetLoginStatus,clearOtpVerificationError,resetOtpVerificationStatus,clearResendOtpError,clearResendOtpSuccessMessage,resetResendOtpStatus,clearForgotPasswordError,clearForgotPasswordSuccessMessage,resetForgotPasswordStatus,clearResetPasswordError,clearResetPasswordSuccessMessage,resetResetPasswordStatus}=authSlice.actions
+export const {clearAuthSuccessMessage,clearAuthErrors,resetAuthStatus,clearSignupError,clearSignupData,resetSignupStatus,clearLoginError,resetLoginStatus,clearOtpVerificationError,resetOtpVerificationStatus,clearResendOtpError,clearResendOtpSuccessMessage,resetResendOtpStatus,clearForgotPasswordError,clearForgotPasswordSuccessMessage,resetForgotPasswordStatus,clearResetPasswordError,clearResetPasswordSuccessMessage,resetResetPasswordStatus}=authSlice.actions
 
 export default authSlice.reducer
 

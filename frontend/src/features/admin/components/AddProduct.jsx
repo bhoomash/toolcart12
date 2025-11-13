@@ -69,8 +69,8 @@ export const AddProduct = () => {
                         <Select {...register("brand",{required:"Brand is required"})} labelId="brand-selection" label="Brand">
                             
                             {
-                                brands.map((brand)=>(
-                                    <MenuItem value={brand._id}>{brand.name}</MenuItem>
+                                Array.isArray(brands) && brands.map((brand)=>(
+                                    <MenuItem key={brand._id} value={brand._id}>{brand.name}</MenuItem>
                                 ))
                             }
 
@@ -83,8 +83,8 @@ export const AddProduct = () => {
                         <Select {...register("category",{required:"category is required"})} labelId="category-selection" label="Category">
                             
                             {
-                                categories.map((category)=>(
-                                    <MenuItem value={category._id}>{category.name}</MenuItem>
+                                Array.isArray(categories) && categories.map((category)=>(
+                                    <MenuItem key={category._id} value={category._id}>{category.name}</MenuItem>
                                 ))
                             }
 

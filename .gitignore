@@ -122,10 +122,10 @@ Thumbs.db
 *~
 
 # Vercel
-.vercel
+# .vercel
 
-# Netlify
-.netlify/
+# # Netlify
+# .netlify/
 
 # PM2
 ecosystem.config.js

@@ -1,5 +1,5 @@
 import {FormHelperText, Stack, TextField, Typography, useMediaQuery, useTheme } from '@mui/material'
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import Lottie from 'lottie-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from "react-hook-form"
@@ -20,16 +20,33 @@ export const Login = () => {
   const theme=useTheme()
   const is900=useMediaQuery(theme.breakpoints.down(900))
   const is480=useMediaQuery(theme.breakpoints.down(480))
+  const hasNavigated = useRef(false)
   
-  // handles user redirection
+  // handles login success - show toast and redirect based on user role
   useEffect(()=>{
-    if(loggedInUser && loggedInUser?.isVerified){
-      navigate("/")
+    if(status==='fulfilled' && loggedInUser && !hasNavigated.current){
+      hasNavigated.current = true
+      
+      // Show different success messages based on user role
+      const redirectMessage = loggedInUser.isAdmin 
+        ? 'Login successful! Redirecting to Admin Dashboard...' 
+        : 'Login successful! Welcome to ToolCart!'
+      toast.success(redirectMessage)
+      reset()
+      
+      // Redirect based on user role
+      if(loggedInUser.isAdmin){
+        navigate("/admin/dashboard")
+      } else {
+        navigate("/")
+      }
     }
-    else if(loggedInUser && !loggedInUser?.isVerified){
-      navigate("/verify-otp")
+    return ()=>{
+      hasNavigated.current = false  // Reset navigation flag
+      dispatch(clearLoginError())
+      dispatch(resetLoginStatus())
     }
-  },[loggedInUser])
+  },[status, loggedInUser, dispatch, reset, navigate])
 
   // handles login error and toast them
   useEffect(()=>{
@@ -37,18 +54,6 @@ export const Login = () => {
       toast.error(error.message)
     }
   },[error])
-
-  // handles login status and dispatches reset actions to relevant states in cleanup
-  useEffect(()=>{
-    if(status==='fulfilled' && loggedInUser?.isVerified===true){
-      toast.success(`Login successful`)
-      reset()
-    }
-    return ()=>{
-      dispatch(clearLoginError())
-      dispatch(resetLoginStatus())
-    }
-  },[status])
 
   const handleLogin=(data)=>{
     const cred={...data}

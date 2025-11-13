@@ -47,23 +47,13 @@ exports.signup = asyncErrorHandler(async(req,res,next) => {
             `Welcome to ToolCart! Your One-Time Password (OTP) for email verification is: <b>${otp}</b>.<br/>This OTP will expire in 2 minutes. Do not share this OTP with anyone for security reasons.`
         )
 
-        // getting secure user info
-        const secureInfo=sanitizeUser(createdUser)
-
-        // generating jwt token
-        const token=generateToken(secureInfo)
-
-        // sending jwt token in the response cookies
-        res.cookie('token',token,{
-            sameSite:process.env.PRODUCTION==='true'?"None":'Lax',
-            maxAge:new Date(Date.now() + (parseInt(process.env.COOKIE_EXPIRATION_DAYS * 24 * 60 * 60 * 1000))),
-            httpOnly:true,
-            secure:process.env.PRODUCTION==='true'?true:false
-        })
-
-        return sendAuthSuccess(
+        // Return user info WITHOUT JWT token - user must verify OTP first
+        return sendSuccess(
             res, 
-            sanitizeUser(createdUser), 
+            { 
+                user: sanitizeUser(createdUser),
+                requiresVerification: true 
+            }, 
             "Account created successfully! Please check your email for the verification OTP.", 
             201
         );
@@ -123,7 +113,20 @@ exports.verifyOtp = asyncErrorHandler(async(req,res,next) => {
     if(isOtpExisting && (await bcrypt.compare(req.body.otp,isOtpExisting.otp))){
         await Otp.findByIdAndDelete(isOtpExisting._id)
         const verifiedUser = await User.findByIdAndUpdate(isValidUserId._id,{isVerified:true},{new:true})
-        return res.status(200).json(sanitizeUser(verifiedUser))
+        
+        // Generate JWT token after successful verification
+        const secureInfo = sanitizeUser(verifiedUser)
+        const token = generateToken(secureInfo)
+
+        // Set JWT token in response cookies
+        res.cookie('token', token, {
+            sameSite: process.env.PRODUCTION === 'true' ? "None" : 'Lax',
+            maxAge: new Date(Date.now() + (parseInt(process.env.COOKIE_EXPIRATION_DAYS * 24 * 60 * 60 * 1000))),
+            httpOnly: true,
+            secure: process.env.PRODUCTION === 'true' ? true : false
+        })
+
+        return sendAuthSuccess(res, sanitizeUser(verifiedUser), "Email verified successfully! Welcome to ToolCart!");
     }
 
     // in default case if none of the conidtion matches, then return this response

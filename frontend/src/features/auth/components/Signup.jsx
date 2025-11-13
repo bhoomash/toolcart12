@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form"
 import { ecommerceOutlookAnimation} from '../../../assets'
 import {useDispatch,useSelector} from 'react-redux'
 import { LoadingButton } from '@mui/lab';
-import {selectLoggedInUser, signupAsync,selectSignupStatus, selectSignupError, clearSignupError, resetSignupStatus} from '../AuthSlice'
+import {selectLoggedInUser, signupAsync,selectSignupStatus, selectSignupError, selectSignupData, clearSignupError, clearSignupData, resetSignupStatus} from '../AuthSlice'
 import { toast } from 'react-toastify'
 import { MotionConfig , motion} from 'framer-motion'
 
@@ -14,6 +14,7 @@ export const Signup = () => {
   const dispatch=useDispatch()
   const status=useSelector(selectSignupStatus)
   const error=useSelector(selectSignupError)
+  const signupData=useSelector(selectSignupData)
   const loggedInUser=useSelector(selectLoggedInUser)
   const {register,handleSubmit,reset,formState: { errors }} = useForm()
   const navigate=useNavigate()
@@ -23,13 +24,14 @@ export const Signup = () => {
 
   // handles user redirection
   useEffect(()=>{
-    if(loggedInUser && !loggedInUser?.isVerified){
-      navigate("/verify-otp")
-    }
-    else if(loggedInUser){
+    if(loggedInUser){
       navigate("/")
     }
-  },[loggedInUser])
+    // If signup was successful, redirect to OTP verification with user data
+    else if(signupData && signupData.user && status === 'fulfilled'){
+      navigate("/verify-otp", { state: { userData: signupData.user } })
+    }
+  },[loggedInUser, signupData, status, navigate])
 
 
   // handles signup error and toast them
@@ -47,9 +49,10 @@ export const Signup = () => {
     }
     return ()=>{
       dispatch(clearSignupError())
+      dispatch(clearSignupData())
       dispatch(resetSignupStatus())
     }
-  },[status])
+  },[status, dispatch])
 
   // this function handles signup and dispatches the signup action with credentails that api requires
   const handleSignup=(data)=>{

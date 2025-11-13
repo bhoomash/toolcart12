@@ -113,7 +113,7 @@ export const ProductUpdate = () => {
                                 <Select defaultValue={selectedProduct.brand._id} {...register("brand",{required:"Brand is required"})} labelId="brand-selection" label="Brand">
                                     
                                     {
-                                        brands.map((brand)=>(
+                                        Array.isArray(brands) && brands.map((brand)=>(
                                             <MenuItem key={brand._id} value={brand._id}>{brand.name}</MenuItem>
                                         ))
                                     }
@@ -127,7 +127,7 @@ export const ProductUpdate = () => {
                                 <Select defaultValue={selectedProduct.category._id} {...register("category",{required:"category is required"})} labelId="category-selection" label="Category">
                                     
                                     {
-                                        categories.map((category)=>(
+                                        Array.isArray(categories) && categories.map((category)=>(
                                             <MenuItem key={category._id} value={category._id}>{category.name}</MenuItem>
                                         ))
                                     }

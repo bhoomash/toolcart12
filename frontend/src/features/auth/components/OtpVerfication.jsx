@@ -3,7 +3,7 @@ import React, { useEffect} from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { clearOtpVerificationError, clearResendOtpError, clearResendOtpSuccessMessage, resendOtpAsync, resetOtpVerificationStatus, resetResendOtpStatus, selectLoggedInUser, selectOtpVerificationError, selectOtpVerificationStatus, selectResendOtpError, selectResendOtpStatus, selectResendOtpSuccessMessage, verifyOtpAsync } from '../AuthSlice'
 import { LoadingButton } from '@mui/lab'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useForm } from "react-hook-form"
 import {toast} from 'react-toastify'
 
@@ -14,29 +14,38 @@ export const OtpVerfication = () => {
     const dispatch=useDispatch()
     const loggedInUser=useSelector(selectLoggedInUser)
     const navigate=useNavigate()
+    const location=useLocation()
+    
+    // Get user data from navigation state (from signup) or from logged-in user
+    const userData = location.state?.userData || loggedInUser
     const resendOtpStatus=useSelector(selectResendOtpStatus)
     const resendOtpError=useSelector(selectResendOtpError)
     const resendOtpSuccessMessage=useSelector(selectResendOtpSuccessMessage)
     const otpVerificationStatus=useSelector(selectOtpVerificationStatus)
     const otpVerificationError=useSelector(selectOtpVerificationError)
 
-    // handles the redirection
+    // handles the redirection based on user role
     useEffect(()=>{
-        if(!loggedInUser){
+        if(!userData){
             navigate('/login')
         }
         else if(loggedInUser && loggedInUser?.isVerified){
-            navigate("/")
+            // Redirect based on user role after verification
+            if(loggedInUser.isAdmin){
+                navigate("/admin/dashboard")
+            } else {
+                navigate("/")
+            }
         }
-    },[loggedInUser])
+    },[userData, loggedInUser, navigate])
 
     const handleSendOtp=()=>{
-        const data={user:loggedInUser?._id}
+        const data={user:userData?._id}
         dispatch(resendOtpAsync(data))
     }
     
     const handleVerifyOtp=(data)=>{
-        const cred={...data,userId:loggedInUser?._id}
+        const cred={...data,userId:userData?._id}
         dispatch(verifyOtpAsync(cred))
     }
 
@@ -48,7 +57,7 @@ export const OtpVerfication = () => {
         return ()=>{
             dispatch(clearResendOtpError())
         }
-    },[resendOtpError])
+    },[resendOtpError, dispatch])
 
     // handles resend otp success message
     useEffect(()=>{
@@ -58,7 +67,7 @@ export const OtpVerfication = () => {
         return ()=>{
             dispatch(clearResendOtpSuccessMessage())
         }
-    },[resendOtpSuccessMessage])
+    },[resendOtpSuccessMessage, dispatch])
 
     // handles error while verifying otp
     useEffect(()=>{
@@ -68,17 +77,23 @@ export const OtpVerfication = () => {
         return ()=>{
             dispatch(clearOtpVerificationError())
         }
-    },[otpVerificationError])
+    },[otpVerificationError, dispatch])
 
     useEffect(()=>{
         if(otpVerificationStatus==='fulfilled'){
-            toast.success("Email verified! We are happy to have you here")
+            toast.success("Email verified! Welcome to ToolCart!")
             dispatch(resetResendOtpStatus())
+            // Navigate based on user role after successful verification
+            if(loggedInUser?.isAdmin){
+                navigate("/admin/dashboard")
+            } else {
+                navigate("/")
+            }
         }
         return ()=>{
             dispatch(resetOtpVerificationStatus())
         }
-    },[otpVerificationStatus])
+    },[otpVerificationStatus, dispatch, navigate, loggedInUser])
 
   return (
     <Stack width={'100vw'} height={'100vh'} noValidate flexDirection={'column'} rowGap={3} justifyContent="center" alignItems="center" >
@@ -89,12 +104,12 @@ export const OtpVerfication = () => {
             <Typography mt={4} variant='h5' fontWeight={500}>Verify Your Email Address</Typography>
 
             {
-                loggedInUser && !loggedInUser?.isVerified ?(
+                userData && !userData?.isVerified ?(
                     <Stack width={'100%'} rowGap={'1rem'} component={'form'} noValidate onSubmit={handleSubmit(handleVerifyOtp)}>
                         <Stack rowGap={'1rem'}> 
                             <Stack>
                                 <Typography  color={'GrayText'}>Enter the 4 digit OTP sent on</Typography>
-                                <Typography fontWeight={'600'} color={'GrayText'}>{loggedInUser?.email}</Typography>
+                                <Typography fontWeight={'600'} color={'GrayText'}>{userData?.email}</Typography>
                             </Stack>
                             <Stack>
                                 <TextField {...register("otp",{required:"OTP is required",minLength:{value:4,message:"Please enter a 4 digit OTP"}})} fullWidth type='number' />
